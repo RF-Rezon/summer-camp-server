@@ -23,7 +23,7 @@ async function run() {
   const summerInstructors = client.db("summerDB").collection("instructors");
   const summerAddedNewClass = client.db("summerDB").collection("addedNewClass");
   const summerUsersCollectons = client.db("summerDB").collection("all_users");
-  const summerClassTakenStudent = client.db("summerDB").collection("class_taken_users");
+  const summerClassTakenStudent = client.db("summerDB").collection("classTakenUsers");
 
   try {
     // await client.connect();
@@ -85,47 +85,25 @@ async function run() {
       res.send(cursor);
     });
 
-    // app.get("/new_added_class/:email", async (req, res) => {
-    //   const email = req.params.email;
-    //   const query = {email : {i_email: email}}
-    //   const cursor = await summerAddedNewClass.find(query).toArray();
-    //   console.log(cursor)
-    //   if (cursor.length === 0) {
-    //     res.status(404).json({ error: 'No users found' });
-    //     return;
-    //   }
-    //   res.send(cursor);
-    // });
+    app.get("/classTakenStudents", async (req, res) => {
+      const query =  await summerClassTakenStudent.find().toArray();
+      res.send(query); 
+    });
 
-    // app.post("/class_taken_students", async (req, res) => {
-    //   const user = req.body;
+    app.post("/classTakenStudents", async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email };
+      const existingUser = await summerClassTakenStudent.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "user already exists on the database." });
+      }
+      const result = await summerClassTakenStudent.insertOne(user);
+      res.send(result);
+    });
 
-    //   // Avoid adding rows in the dabase for the user alreary exist on the database.
 
-    //   const query = { email: user.email };
-    //   const existingUser = await summerClassTakenStudent.findOne(query);
 
-    //   if (existingUser) {
-    //     return res.send({ message: "This user already taken the class." });
-    //   }
 
-    //   // Adding All users (user, intructor, admin) in the database.
-
-    //   const result = await summerClassTakenStudent.insertOne(user);
-    //   res.send(result);
-    // });
-
-    // app.get("/class_taken_students", async (req, res) => {
-    //   const cursor = await summerClassTakenStudent.find().toArray();
-    //   res.send(cursor);
-    // });
-
-    // app.post("/student", async (req, res) => {
-    //   const data = req.body;
-    //   console.log(data)
-    //   // const cursor = await summerInstructors.find().toArray();
-    //   res.send();
-    // });
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
