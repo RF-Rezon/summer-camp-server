@@ -20,16 +20,93 @@ const client = new MongoClient(uri, {
 });
 
 async function run() {
-
   const summerInstructors = client.db("summerDB").collection("instructors");
+  const summerAddedNewClass = client.db("summerDB").collection("added_new_class");
+  const summerUsersCollectons = client.db("summerDB").collection("all_users");
+  const summerClassTakenStudent = client.db("summerDB").collection("class_taken_users");
 
   try {
     // await client.connect();
+
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+
+      // Avoid adding rows in the dabase for the user alreary exist on the database.
+
+      const query = { email: user.email };
+      const existingUser = await summerUsersCollectons.findOne(query);
+
+      if (existingUser) {
+        return res.send({ message: "user already exists on the database." });
+      }
+
+      // Adding All users (user, intructor, admin) in the database.
+
+      const result = await summerUsersCollectons.insertOne(user);
+      res.send(result);
+    });
 
     app.get("/instructors", async (req, res) => {
       const cursor = await summerInstructors.find().toArray();
       res.send(cursor);
     });
+
+    app.get("/users/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await summerUsersCollectons.findOne(query);
+      const result = { admin: user?.role === "admin" };
+      res.send(result);
+    });
+
+    app.get("/users/instructor/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await summerUsersCollectons.findOne(query);
+      const result = { instructor: user?.role === "instructor" };
+      res.send(result);
+    });
+
+    app.post("/new_added_class", async (req, res) => {
+      const data = req.body;
+      const cursor = await summerAddedNewClass.insertOne(data);
+      res.send(cursor);
+    });
+
+    app.get("/new_added_class", async (req, res) => {
+      const cursor = await summerAddedNewClass.find().toArray();
+      res.send(cursor);
+    });
+
+    app.post("/class_taken_students/", async (req, res) => {
+      const user = req.body;
+
+      // Avoid adding rows in the dabase for the user alreary exist on the database.
+
+      const query = { email: user.email };
+      const existingUser = await summerClassTakenStudent.findOne(query);
+
+      if (existingUser) {
+        return res.send({ message: "This user already taken the class." });
+      }
+
+      // Adding All users (user, intructor, admin) in the database.
+
+      const result = await summerClassTakenStudent.insertOne(user);
+      res.send(result);
+    });
+
+    app.get("/class_taken_students", async (req, res) => {
+      const cursor = await summerClassTakenStudent.find().toArray();
+      res.send(cursor);
+    });
+
+    // app.post("/student", async (req, res) => {
+    //   const data = req.body;
+    //   console.log(data)
+    //   // const cursor = await summerInstructors.find().toArray();
+    //   res.send();
+    // });
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
