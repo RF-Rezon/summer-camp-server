@@ -24,6 +24,7 @@ async function run() {
   const summerAddedNewClass = client.db("summerDB").collection("addedNewClass");
   const summerUsersCollectons = client.db("summerDB").collection("all_users");
   const summerClassTakenStudent = client.db("summerDB").collection("classTakenUsers");
+  const summerGeneralUsers = client.db("summerDB").collection("general_users");
 
   try {
     // await client.connect();
@@ -48,6 +49,22 @@ async function run() {
 
     app.get("/instructors", async (req, res) => {
       const cursor = await summerInstructors.find().toArray();
+      res.send(cursor);
+    });
+
+    // app.get("/users", async (req, res) => {
+    //   const cursor =await summerUsersCollectons.find({ role: { $exists: false } }).toArray();
+    //   const insertResult = await summerGeneralUsers.insertMany(cursor);
+    //   res.send(insertResult);
+    // });
+
+    // app.get("/users/general", async (req, res) => {
+    //   const insertResult = await summerGeneralUsers.find().toArray();
+    //   res.send(insertResult);
+    // });
+
+      app.get("/users", async (req, res) => {
+      const cursor =await summerUsersCollectons.find().toArray();
       res.send(cursor);
     });
 
@@ -112,6 +129,36 @@ async function run() {
       res.send(result);
 
     })
+
+    app.patch('/newAddedClass/makeadmin/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const makeAdmin = {
+        $set: {
+          role: 'admin'
+        },
+      };
+
+      const result = await summerUsersCollectons.updateOne(filter, makeAdmin);
+      res.send(result);
+
+    })
+
+    app.patch('/newAddedClass/makeinstructor/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const filter = { _id: new ObjectId(id) };
+      const makeInstructor = {
+        $set: {
+          role: 'instructor'
+        },
+      };
+
+      const result = await summerUsersCollectons.updateOne(filter, makeInstructor);
+      res.send(result);
+    })
+
+
 
 
     app.get("/classTakenStudents", async (req, res) => {
