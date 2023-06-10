@@ -7,7 +7,7 @@ const port = process.env.PORT || 4000;
 app.use(express.json());
 app.use(cors());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@summerprojectcluster.iiq59ed.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -85,6 +85,35 @@ async function run() {
       res.send(cursor);
     });
 
+    app.patch('/newAddedClass/approve/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateStatus = {
+        $set: {
+          status: 'approved'
+        },
+      };
+
+      const result = await summerAddedNewClass.updateOne(filter, updateStatus);
+      res.send(result);
+
+    })
+
+    app.patch('/newAddedClass/deny/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateStatus = {
+        $set: {
+          status: 'denied'
+        },
+      };
+
+      const result = await summerAddedNewClass.updateOne(filter, updateStatus);
+      res.send(result);
+
+    })
+
+
     app.get("/classTakenStudents", async (req, res) => {
       const query =  await summerClassTakenStudent.find().toArray();
       res.send(query); 
@@ -101,6 +130,7 @@ async function run() {
       res.send(result);
     });
 
+  
 
 
 
