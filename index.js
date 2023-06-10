@@ -63,8 +63,8 @@ async function run() {
     //   res.send(insertResult);
     // });
 
-      app.get("/users", async (req, res) => {
-      const cursor =await summerUsersCollectons.find().toArray();
+    app.get("/users", async (req, res) => {
+      const cursor = await summerUsersCollectons.find().toArray();
       res.send(cursor);
     });
 
@@ -86,7 +86,7 @@ async function run() {
 
     app.get("/newAddedClass/:email", async (req, res) => {
       const getEmail = req.params.email;
-      const queryMail = {email : getEmail};
+      const queryMail = { email: getEmail };
       const query = await summerAddedNewClass.find(queryMail).toArray();
       res.send(query);
     });
@@ -95,92 +95,93 @@ async function run() {
       const query = await summerAddedNewClass.find().toArray();
       res.send(query);
     });
-    
+
     app.post("/newAddedClass", async (req, res) => {
       const newclass = req.body;
       const cursor = await summerAddedNewClass.insertOne(newclass);
       res.send(cursor);
     });
 
-    app.patch('/newAddedClass/approve/:id', async (req, res) => {
+    app.patch("/newAddedClass/approve/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateStatus = {
         $set: {
-          status: 'approved'
+          status: "approved",
         },
       };
 
       const result = await summerAddedNewClass.updateOne(filter, updateStatus);
       res.send(result);
+    });
 
-    })
-
-    app.patch('/newAddedClass/deny/:id', async (req, res) => {
+    app.patch("/newAddedClass/deny/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateStatus = {
         $set: {
-          status: 'denied'
+          status: "denied",
         },
       };
 
       const result = await summerAddedNewClass.updateOne(filter, updateStatus);
       res.send(result);
+    });
 
-    })
-
-    app.patch('/newAddedClass/makeadmin/:id', async (req, res) => {
+    app.patch("/newAddedClass/makeadmin/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const makeAdmin = {
         $set: {
-          role: 'admin'
+          role: "admin",
         },
       };
 
       const result = await summerUsersCollectons.updateOne(filter, makeAdmin);
       res.send(result);
+    });
 
-    })
-
-    app.patch('/newAddedClass/makeinstructor/:id', async (req, res) => {
+    app.patch("/newAddedClass/makeinstructor/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
       const filter = { _id: new ObjectId(id) };
       const makeInstructor = {
         $set: {
-          role: 'instructor'
+          role: "instructor",
         },
       };
 
       const result = await summerUsersCollectons.updateOne(filter, makeInstructor);
       res.send(result);
-    })
-
-
-
+    });
 
     app.get("/classTakenStudents", async (req, res) => {
-      const query =  await summerClassTakenStudent.find().toArray();
-      res.send(query); 
+      const query = await summerClassTakenStudent.find().toArray();
+      res.send(query);
     });
+
+    // app.get(`/classTakenStudents/:id`, async (req, res) => {
+    //   const query =  await summerClassTakenStudent.find().toArray();
+    //   res.send(query);
+    // });
 
     app.post("/classTakenStudents", async (req, res) => {
       const user = req.body;
-      const query = { email: user.email };
-      const existingUser = await summerClassTakenStudent.findOne(query);
-      if (existingUser) {
-        return res.send({ message: "user already exists on the database." });
-      }
+      // const query = { email: user.email };
+      // const existingUser = await summerClassTakenStudent.findOne(query);
+      // if (existingUser) {
+      //   return res.send({ message: "user already exists on the database." });
+      // }
       const result = await summerClassTakenStudent.insertOne(user);
       res.send(result);
     });
 
-  
-
-
-
+    app.delete("/classTakenStudents/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await summerClassTakenStudent.deleteOne(query);
+      res.send(result);
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
