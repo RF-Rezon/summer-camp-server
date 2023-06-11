@@ -1,11 +1,32 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+var jwt = require("jsonwebtoken");
 require("dotenv").config();
 const port = process.env.PORT || 4000;
 
 app.use(express.json());
 app.use(cors());
+
+// const  verifyJWt = (req,res,next) =>{
+//   const authorization = req.headers.authorization;
+//   if(!authorization) {
+//     return res.status(401).send({
+//       error :true, message:"unauthorized Access "
+//     })
+//   }
+//   const token = authorization.split(" ")[1];
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET , (err,decoded) =>{
+//     if(err){
+//       return res.status(401).send({
+//         error: true,
+//         message: "unauthorized Access ",
+//       });
+//     }
+//     req.decoded = decoded;
+//     next();
+//   })
+// }
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@summerprojectcluster.iiq59ed.mongodb.net/?retryWrites=true&w=majority`;
@@ -27,6 +48,13 @@ async function run() {
   const summerGeneralUsers = client.db("summerDB").collection("general_users");
 
   try {
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "10h",
+      });
+      res.send({ token });
+    });
     // await client.connect();
 
     app.post("/users", async (req, res) => {
@@ -84,6 +112,20 @@ async function run() {
       res.send(result);
     });
 
+
+    app.post("/newAddedClass", async (req, res) => {
+      const newclass = req.body;
+      const cursor = await summerAddedNewClass.insertOne(newclass);
+      res.send(cursor);
+    });
+
+
+    app.get("/newAddedClass", async (req, res) => {
+      const query = await summerAddedNewClass.find().toArray();
+      res.send(query);
+    });
+
+
     app.get("/newAddedClass/:email", async (req, res) => {
       const getEmail = req.params.email;
       const queryMail = { email: getEmail };
@@ -91,16 +133,6 @@ async function run() {
       res.send(query);
     });
 
-    app.get("/newAddedClass", async (req, res) => {
-      const query = await summerAddedNewClass.find().toArray();
-      res.send(query);
-    });
-
-    app.post("/newAddedClass", async (req, res) => {
-      const newclass = req.body;
-      const cursor = await summerAddedNewClass.insertOne(newclass);
-      res.send(cursor);
-    });
 
     app.patch("/newAddedClass/approve/:id", async (req, res) => {
       const id = req.params.id;
@@ -114,6 +146,10 @@ async function run() {
       const result = await summerAddedNewClass.updateOne(filter, updateStatus);
       res.send(result);
     });
+
+
+
+
 
     app.patch("/newAddedClass/deny/:id", async (req, res) => {
       const id = req.params.id;

@@ -19,10 +19,10 @@
   },
   "homepage": "https://github.com/programming-hero-web-course1/b7a12-summer-camp-server_side-RF-Rezon#readme",
   "dependencies": {
-    "express": "^4.18.2",
     "@tanstack/react-query": "^4.29.12",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
+    "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
     "mongodb": "^5.5.0",
     "nodemon": "^2.0.22",
