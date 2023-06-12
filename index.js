@@ -8,8 +8,7 @@ const port = process.env.PORT || 4000;
 app.use(express.json());
 app.use(cors());
 
-// const verifyJWT = (req, res, next) => {
-//   const authorization = req.headers.authorization;
+//   const authorization = req.headers.Authorization;
 //   if (!authorization) {
 //     return res.status(401).send({ error: true, message: "unauthorized access" });
 //   }
@@ -46,13 +45,6 @@ async function run() {
   try {
     await client.connect();
 
-    // app.post("/jwt", (req, res) => {
-    //   const user = req.body;
-    //   const token = jwt.sign(user, process.env.TOKEN_SECRET, { expiresIn: "10h" });
-
-    //   res.send({ token });
-    // });
-
     app.post("/users", async (req, res) => {
       const user = req.body;
 
@@ -75,7 +67,6 @@ async function run() {
       const cursor = await summerInstructors.find().toArray();
       res.send(cursor);
     });
-
 
     app.get("/users", async (req, res) => {
       const cursor = await summerUsersCollectons.find().toArray();
@@ -126,6 +117,22 @@ async function run() {
       };
 
       const result = await summerAddedNewClass.updateOne(filter, updateStatus);
+      res.send(result);
+    });
+
+    app.patch("/newAddedClass/feedBack/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      const info = req.body.feedBack;
+
+      const updateStatus = {
+        $set: {
+          feedBack: info,
+        },
+      };
+
+      const result = await summerAddedNewClass.updateOne(query, updateStatus);
       res.send(result);
     });
 
