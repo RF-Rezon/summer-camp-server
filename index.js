@@ -8,22 +8,6 @@ const port = process.env.PORT || 4000;
 app.use(express.json());
 app.use(cors());
 
-//   const authorization = req.headers.Authorization;
-//   if (!authorization) {
-//     return res.status(401).send({ error: true, message: "unauthorized access" });
-//   }
-//   // bearer token
-//   const token = authorization.split(" ")[1];
-
-//   jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
-//     if (err) {
-//       return res.status(401).send({ error: true, message: "unauthorized access" });
-//     }
-//     req.decoded = decoded;
-//     next();
-//   });
-// };
-
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@summerprojectcluster.iiq59ed.mongodb.net/?retryWrites=true&w=majority`;
 
