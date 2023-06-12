@@ -27,7 +27,6 @@ async function run() {
   const summerClassTakenStudent = client.db("summerDB").collection("classTakenUsers");
 
   try {
-    await client.connect();
 
     app.post("/users", async (req, res) => {
       const user = req.body;
