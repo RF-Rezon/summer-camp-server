@@ -161,26 +161,19 @@ async function run() {
 
     // .............................................
 
-    app.get("/classTakenStudents", async (req, res) => {
-      const query = await summerClassTakenStudent.find().toArray();
-      res.send(query);
-    });
+   
 
     app.post("/classTakenStudents", async (req, res) => {
       const user = req.body;
-      const query = { email: user.email };
-      const existingUser = await summerClassTakenStudent.findOne(query);
-
-      if (existingUser) {
-        const update = { $inc: { enrolled: 1 } };
-        await summerClassTakenStudent.updateOne(query, update);
-        return res.send({ message: "user already exists on the database." });
-      }
-
-      // Adding All users (user, intructor, admin) in the database.
-
       const result = await summerClassTakenStudent.insertOne(user);
       res.send(result);
+    });
+
+    app.get("/classTakenStudents/:email", async (req, res) => {
+      const userEmail =  req.params.email;
+      const finalUserMail = {email : userEmail}
+      const query = await summerClassTakenStudent.find(finalUserMail).toArray();
+      res.send(query);
     });
 
     app.delete("/classTakenStudents/delete/:id", async (req, res) => {
