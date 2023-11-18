@@ -8,6 +8,9 @@ const port = process.env.PORT || 4000;
 app.use(express.json());
 app.use(cors());
 
+
+console.log(process.env.USER_PASSWORD)
+
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@summerprojectcluster.iiq59ed.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -63,6 +66,16 @@ async function run() {
       const result = { admin: user?.role === "admin" };
       res.send(result);
     });
+
+    // app.get("/users/:email", async (req, res) => {
+    //   const email = req.params.email;
+    //   const query = { email: email };
+    //   const user = await summerUsersCollectons.findOne(query);
+    //   const result = user?.role;
+    //   res.send(result);
+    // });
+
+
 
     app.get("/users/instructor/:email", async (req, res) => {
       const email = req.params.email;

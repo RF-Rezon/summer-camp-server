@@ -4,7 +4,7 @@
   "description": "\"# b7a12-summer-camp-server_side-RF-Rezon\"",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "nodemon your-app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,7 +25,9 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
     "mongodb": "^5.5.0",
-    "nodemon": "^2.0.22",
     "stripe": "^12.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
