@@ -1,18 +1,20 @@
 const express = require("express");
+const nodemailer = require('nodemailer');
+
 const cors = require("cors");
+const stripe = require("stripe")(process.env.STRIPE_KEY);
 const app = express();
-const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const port = process.env.PORT || 4000;
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); 
 app.use(cors());
-
-
-console.log(process.env.USER_PASSWORD)
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@summerprojectcluster.iiq59ed.mongodb.net/?retryWrites=true&w=majority`;
+
+
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -28,8 +30,6 @@ async function run() {
   const summerAddedNewClass = client.db("summerDB").collection("addedNewClass");
   const summerUsersCollectons = client.db("summerDB").collection("all_users");
   const summerClassTakenStudent = client.db("summerDB").collection("classTakenUsers");
-
-  try {
 
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -67,16 +67,7 @@ async function run() {
       res.send(result);
     });
 
-    // app.get("/users/:email", async (req, res) => {
-    //   const email = req.params.email;
-    //   const query = { email: email };
-    //   const user = await summerUsersCollectons.findOne(query);
-    //   const result = user?.role;
-    //   res.send(result);
-    // });
-
-
-
+   
     app.get("/users/instructor/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
@@ -195,10 +186,92 @@ async function run() {
       res.send(result);
     });
 
+    ///////////////////////////////// - PAYMENT - /////////////////////////////////////////////////////
+// >>>>>>>>>>>>>>>>>>>>> First Process >>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // app.post("/checkout", async(req, res)=> {
+    //  try{
+    //   const session = await stripe.checkout.sessions.create({
+    //     mode: 'payment',
+    //     success_url: `${DOMAIN}/success`,
+    //     cancel_url: `${DOMAIN}/cancel`,
+    //     line_items: req.body.courses.map(item => {
+    //       return {
+    //         price_data:{
+    //           currency:"inr",
+    //           product_data:{
+    //             email:item.email
+    //           },
+    //           unit_amount:item.price,
+    //         }
+    //       }
+    //     })
+    //   });
+    
+    //   res.json({url:session.url});
+    //   const paymentIntent = await stripe.paymentIntents.create({
+    //     amount: calculateOrderAmount(items),
+    //     currency: 'usd',
+    //     receipt_email: email,
+    //   });
+
+    //   res.json({ clientSecret: paymentIntent.client_secret });
+
+    //  }catch (error) {
+    //   res.status(500).json({error:error.message})
+    //   console.log("Problem is here")
+    //  }
+    // })
+
+
+    // >>>>>>>>>>>>>>>>>>>>> Sceond Process >>>>>>>>>>>>>>>>>>>>>>>>>>>
+    app.post('/create-payment', async (req, res) => {
+      const { id, price, email } = req.body;
+    
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: +price,
+        currency: 'usd',
+        receipt_email: email,
+      });
+    
+      sendInvoiceEmail(email, paymentIntent.invoice);
+    
+      res.json({ clientSecret: paymentIntent.client_secret });
+    });
+
+    async function sendInvoiceEmail(email, invoiceId) {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+    
+      const mailOptions = {
+        from: process.env.EMAIL,
+        to: email,
+        subject: 'Invoice',
+        text: 'Please find attached invoice.',
+        attachments: [
+          {
+            filename: 'invoice.pdf',
+            path: `https://invoices.stripe.com/invoiceitems/${invoiceId}/invoice.pdf`,
+          },
+        ],
+      };
+    
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+    }
+    
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-  }
 }
 run().catch(console.dir);
 
